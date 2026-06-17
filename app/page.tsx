@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ScriptureCard from "@/components/ScriptureCard";
+import SectionDivider from "@/components/SectionDivider";
 
 // TODO: replace with a Supabase query (table: scriptures, today's date).
 const dailyScripture = {
@@ -29,7 +30,15 @@ export default function Home() {
     <>
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="mx-auto max-w-6xl px-6 pb-8 pt-20 text-center sm:pt-28">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -left-32 -top-32 h-80 w-80 rounded-full bg-gold/20 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 top-10 h-64 w-64 rounded-full bg-gold-soft/30 blur-3xl"
+        />
+        <div className="relative mx-auto max-w-6xl px-6 pb-8 pt-20 text-center sm:pt-28">
           <p className="mb-4 text-xs font-semibold uppercase tracking-[0.3em] text-gold-deep">
             A Christian Workout Community
           </p>
@@ -52,13 +61,17 @@ export default function Home() {
         </div>
       </section>
 
+      <SectionDivider />
+
       {/* Daily scripture — the signature */}
       <section className="px-6 py-14">
         <ScriptureCard {...dailyScripture} />
       </section>
 
+      <SectionDivider />
+
       {/* Destinations */}
-      <section className="mx-auto max-w-6xl px-6 pb-24">
+      <section className="mx-auto max-w-6xl px-6 pt-14 pb-24">
         <div className="grid gap-6 sm:grid-cols-2">
           {destinations.map((d) => (
             <Link

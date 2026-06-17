@@ -25,7 +25,9 @@
 }
 
 body {
-  background: var(--color-ivory);
+  background-color: var(--color-ivory);
+  background-image: radial-gradient(circle at 1px 1px, rgba(197, 160, 71, 0.18) 1px, transparent 0);
+  background-size: 28px 28px;
   color: var(--color-ink);
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
