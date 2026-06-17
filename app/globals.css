@@ -1,0 +1,62 @@
+@import "tailwindcss";
+
+/* ============================================================
+   Called To His Kingdom — design tokens
+   Gold + white, elegant. Cormorant Garamond (display) + Inter (body)
+   ============================================================ */
+@theme inline {
+  --color-ivory:     #FDFBF6;  /* page background — warm white */
+  --color-cream:     #F6EFDD;  /* gold-tinted surface */
+  --color-paper:     #FFFFFF;  /* card surface */
+  --color-gold:      #C5A047;  /* primary gold */
+  --color-gold-deep: #9A7B1F;  /* hover / depth */
+  --color-gold-soft: #E4D199;  /* light accents, borders */
+  --color-ink:       #2A2620;  /* primary text — warm near-black */
+  --color-stone:     #6B6358;  /* secondary text */
+  --color-line:      #E9E0CC;  /* hairline rules */
+
+  --font-display: var(--font-cormorant);
+  --font-sans:    var(--font-inter);
+}
+
+:root {
+  --background: var(--color-ivory);
+  --foreground: var(--color-ink);
+}
+
+body {
+  background: var(--color-ivory);
+  color: var(--color-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Big, obvious, legible buttons — a core brief requirement.
+   Note: Tailwind v4 can't @apply one custom class inside another,
+   so each variant carries its own base utilities. */
+@layer components {
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 rounded-full
+           px-8 py-4 text-base font-semibold tracking-wide transition-all
+           duration-200 focus-visible:outline-none focus-visible:ring-4
+           focus-visible:ring-gold-soft bg-gold text-white shadow-sm
+           hover:bg-gold-deep hover:shadow-md active:translate-y-px;
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded-full
+           px-8 py-4 text-base font-semibold tracking-wide transition-all
+           duration-200 focus-visible:outline-none focus-visible:ring-4
+           focus-visible:ring-gold-soft border-2 border-gold text-gold-deep
+           bg-transparent hover:bg-cream;
+  }
+  /* Thin gold frame used on the scripture "illuminated" card */
+  .gold-frame {
+    box-shadow: 0 0 0 1px var(--color-gold-soft),
+                0 0 0 6px var(--color-paper),
+                0 0 0 7px var(--color-gold);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
