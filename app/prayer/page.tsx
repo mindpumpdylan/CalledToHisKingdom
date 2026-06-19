@@ -1,14 +1,47 @@
 import Link from "next/link";
+import { Inbox } from "lucide-react";
 import PrayerCard from "@/components/PrayerCard";
+import ScrollReveal from "@/components/ScrollReveal";
+import { createClient } from "@/lib/supabase/server";
+import { timeAgo } from "@/lib/format";
 
-// TODO: replace with Supabase query (table: prayer_requests + prayer_interactions counts).
-const prayers = [
-  { author: "Maria L.", category: "Healing", title: "Strength through recovery", body: "Please pray for my mother as she recovers from surgery this week. Grateful for this community.", prayingCount: 24, timeAgo: "2h ago" },
-  { author: "James", category: "Guidance", title: "A new season", body: "Starting a new job and feeling the weight of it. Praying for wisdom and a calm heart.", prayingCount: 11, timeAgo: "5h ago", isAnonymous: true },
-  { author: "Tabitha R.", category: "Gratitude", title: "Thank you, Lord", body: "Six months sober today. Every workout and every prayer here has carried me. Glory to God.", prayingCount: 58, timeAgo: "1d ago" },
-];
+type PrayerRow = {
+  id: string;
+  title: string;
+  body: string;
+  category: string;
+  is_anonymous: boolean;
+  created_at: string;
+  profiles: { display_name: string } | null;
+};
 
-export default function PrayerWall() {
+export default async function PrayerWall() {
+  const supabase = await createClient();
+  const { data: userData } = await supabase.auth.getUser();
+  const viewerId = userData.user?.id ?? null;
+
+  const { data: prayersData } = await supabase
+    .from("prayer_requests")
+    .select("id, title, body, category, is_anonymous, created_at, profiles(display_name)")
+    .order("created_at", { ascending: false });
+  const prayers = prayersData as unknown as PrayerRow[] | null;
+
+  const prayerIds = (prayers ?? []).map((p) => p.id);
+  const { data: interactions } = prayerIds.length
+    ? await supabase
+        .from("prayer_interactions")
+        .select("prayer_request_id, user_id")
+        .eq("type", "praying")
+        .in("prayer_request_id", prayerIds)
+    : { data: [] as { prayer_request_id: string; user_id: string }[] };
+
+  const countsByPrayer = new Map<string, number>();
+  const viewerPrayedSet = new Set<string>();
+  for (const i of interactions ?? []) {
+    countsByPrayer.set(i.prayer_request_id, (countsByPrayer.get(i.prayer_request_id) ?? 0) + 1);
+    if (viewerId && i.user_id === viewerId) viewerPrayedSet.add(i.prayer_request_id);
+  }
+
   return (
     <div className="mx-auto max-w-3xl px-6 py-16">
       <header className="mb-10 text-center">
@@ -23,9 +56,30 @@ export default function PrayerWall() {
       </header>
 
       <div className="space-y-5">
-        {prayers.map((p, i) => (
-          <PrayerCard key={i} prayer={p} />
+        {(prayers ?? []).map((p, i) => (
+          <ScrollReveal key={p.id} style={{ transitionDelay: `${Math.min(i, 5) * 80}ms` }}>
+            <PrayerCard
+              prayer={{
+                id: p.id,
+                author: p.profiles?.display_name ?? "A member",
+                isAnonymous: p.is_anonymous,
+                category: p.category,
+                title: p.title,
+                body: p.body,
+                prayingCount: countsByPrayer.get(p.id) ?? 0,
+                timeAgo: timeAgo(p.created_at),
+                isPraying: viewerPrayedSet.has(p.id),
+              }}
+              viewerSignedIn={!!viewerId}
+            />
+          </ScrollReveal>
         ))}
+        {(prayers ?? []).length === 0 && (
+          <div className="flex flex-col items-center gap-3 py-10 text-center text-stone">
+            <Inbox size={32} className="text-gold-soft" />
+            <p>No prayers yet — be the first to share what&apos;s on your heart.</p>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,15 +1,16 @@
+import { Laptop, MapPin } from "lucide-react";
+
 type Trainer = {
   name: string;
   location: string;
   modes: string[];      // e.g. ["Online", "In person"]
   specialties: string[];
   blurb: string;
-  openSlots: number;
 };
 
 export default function TrainerCard({ trainer }: { trainer: Trainer }) {
   return (
-    <article className="flex flex-col rounded-2xl border border-line bg-paper p-6">
+    <article className="card flex flex-col hover:-translate-y-1 hover:border-gold-soft">
       <div className="flex items-center gap-4">
         <div
           aria-hidden
@@ -29,7 +30,8 @@ export default function TrainerCard({ trainer }: { trainer: Trainer }) {
 
       <div className="mt-4 flex flex-wrap gap-2">
         {trainer.modes.map((m) => (
-          <span key={m} className="rounded-full bg-cream px-3 py-1 text-xs font-semibold text-gold-deep">
+          <span key={m} className="badge-gold inline-flex items-center gap-1">
+            {m === "Online" ? <Laptop size={12} /> : <MapPin size={12} />}
             {m}
           </span>
         ))}
@@ -41,9 +43,9 @@ export default function TrainerCard({ trainer }: { trainer: Trainer }) {
       </div>
 
       <div className="mt-5 flex items-center justify-between border-t border-line pt-4">
-        <span className="text-sm text-stone">{trainer.openSlots} open slots</span>
+        <span className="text-sm text-stone">Accepting clients</span>
         {/* TODO: requires auth — opens trainer_availability booking flow */}
-        <button className="btn-gold !px-5 !py-2.5 !text-sm">View availability</button>
+        <button className="btn-gold-sm">View availability</button>
       </div>
     </article>
   );

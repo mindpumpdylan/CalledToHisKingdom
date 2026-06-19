@@ -1,4 +1,8 @@
 import Link from "next/link";
+import { Cross } from "lucide-react";
+import { getCurrentProfile } from "@/lib/supabase/auth-helpers";
+import { signOut } from "@/app/actions/auth";
+import MobileNav from "@/components/MobileNav";
 
 const links = [
   { href: "/prayer", label: "Prayer Wall" },
@@ -6,16 +10,18 @@ const links = [
   { href: "/profile", label: "My Profile" },
 ];
 
-export default function SiteNav() {
+export default async function SiteNav() {
+  const profile = await getCurrentProfile();
+
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-ivory/90 backdrop-blur">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <Link href="/" className="flex items-center gap-3">
           <span
             aria-hidden
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-gold text-gold-deep font-display text-xl"
+            className="flex h-9 w-9 items-center justify-center rounded-full border border-gold text-gold-deep"
           >
-            ✝
+            <Cross size={18} strokeWidth={2} />
           </span>
           <span className="font-display text-xl font-semibold leading-tight text-ink">
             Called To His Kingdom
@@ -32,15 +38,29 @@ export default function SiteNav() {
               {l.label}
             </Link>
           ))}
-          <Link href="/login" className="btn-gold !px-6 !py-2.5 !text-sm">
-            Sign in
-          </Link>
+          {profile ? (
+            <div className="flex items-center gap-3">
+              <Link
+                href="/profile"
+                aria-hidden
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-cream font-display text-sm font-semibold text-gold-deep"
+              >
+                {profile.display_name.charAt(0).toUpperCase()}
+              </Link>
+              <form action={signOut}>
+                <button type="submit" className="text-sm font-medium text-stone transition-colors hover:text-gold-deep">
+                  Sign out
+                </button>
+              </form>
+            </div>
+          ) : (
+            <Link href="/login" className="btn-gold-sm">
+              Sign in
+            </Link>
+          )}
         </div>
 
-        {/* Mobile: single obvious action */}
-        <Link href="/login" className="btn-gold !px-5 !py-2.5 !text-sm md:hidden">
-          Sign in
-        </Link>
+        <MobileNav signedIn={!!profile} displayName={profile?.display_name} />
       </nav>
     </header>
   );

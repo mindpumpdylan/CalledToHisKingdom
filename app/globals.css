@@ -51,14 +51,45 @@ body {
            focus-visible:ring-gold-soft border-2 border-gold text-gold-deep
            bg-transparent hover:bg-cream;
   }
+  .btn-gold-sm {
+    @apply inline-flex items-center justify-center gap-2 rounded-full
+           px-6 py-2.5 text-sm font-semibold tracking-wide transition-all
+           duration-200 focus-visible:outline-none focus-visible:ring-4
+           focus-visible:ring-gold-soft bg-gold text-white shadow-sm
+           hover:bg-gold-deep hover:shadow-md active:translate-y-px;
+  }
   /* Thin gold frame used on the scripture "illuminated" card */
   .gold-frame {
     box-shadow: 0 0 0 1px var(--color-gold-soft),
                 0 0 0 6px var(--color-paper),
                 0 0 0 7px var(--color-gold);
   }
+  .badge-gold {
+    @apply rounded-full bg-cream px-3 py-1 text-xs font-semibold text-gold-deep;
+  }
+  .input-field {
+    @apply w-full rounded-xl border border-line bg-paper px-4 py-3 outline-none
+           transition-colors focus:border-gold;
+  }
+  .card {
+    @apply rounded-2xl border border-line bg-paper p-6 shadow-sm transition-all
+           hover:shadow-md;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
+}
+
+/* Scroll-reveal: ScrollReveal component toggles .is-visible once a section
+   enters the viewport. The reduced-motion rule above already neutralizes the
+   transition; ScrollReveal itself skips the hidden starting state in that case. */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
 }

@@ -1,16 +1,55 @@
 import Link from "next/link";
+import { Sparkles } from "lucide-react";
 import TrainerCard from "@/components/TrainerCard";
-
-// TODO: replace with Supabase query (trainer_profiles joined to profiles + availability).
-const trainers = [
-  { name: "Daniel Owens", location: "Austin, TX", modes: ["In person", "Online"], specialties: ["Strength", "Beginners"], blurb: "Certified trainer of 8 years. I believe the body is a temple, and I'd love to help you steward yours.", openSlots: 5 },
-  { name: "Grace Kim", location: "Online only", modes: ["Online"], specialties: ["Mobility", "Postpartum"], blurb: "Meeting you wherever you are. Gentle, sustainable programming rooted in encouragement.", openSlots: 9 },
-  { name: "Marcus Bell", location: "Atlanta, GA", modes: ["In person"], specialties: ["Weight loss", "Accountability"], blurb: "No judgment, just brotherhood. Let's get to work and give thanks for every step forward.", openSlots: 3 },
-];
+import ScrollReveal from "@/components/ScrollReveal";
+import { createClient } from "@/lib/supabase/server";
 
 const filters = ["All", "Online", "In person", "Strength", "Mobility", "Weight loss"];
+const modeFilters = new Set(["Online", "In person"]);
 
-export default function Trainers() {
+function filterHref(f: string) {
+  if (f === "All") return "/trainers";
+  if (modeFilters.has(f)) return `/trainers?mode=${encodeURIComponent(f)}`;
+  return `/trainers?specialty=${encodeURIComponent(f)}`;
+}
+
+function isActive(f: string, mode?: string, specialty?: string) {
+  if (f === "All") return !mode && !specialty;
+  if (modeFilters.has(f)) return mode === f;
+  return specialty === f;
+}
+
+export default async function Trainers({
+  searchParams,
+}: {
+  searchParams: Promise<{ mode?: string; specialty?: string }>;
+}) {
+  const { mode, specialty } = await searchParams;
+  const supabase = await createClient();
+
+  let query = supabase
+    .from("trainer_profiles")
+    .select("*, profiles(display_name, location_city, location_state)")
+    .eq("accepting_clients", true);
+
+  if (mode === "Online") query = query.in("modes", ["online", "both"]);
+  if (mode === "In person") query = query.in("modes", ["in_person", "both"]);
+  if (specialty) query = query.contains("specialties", [specialty]);
+
+  const { data: trainerRows } = await query;
+
+  const trainers = (trainerRows ?? []).map((t) => ({
+    name: t.profiles?.display_name ?? "A trainer",
+    location:
+      t.modes === "online"
+        ? "Online only"
+        : [t.profiles?.location_city, t.profiles?.location_state].filter(Boolean).join(", ") ||
+          "Location not set",
+    modes: t.modes === "both" ? ["Online", "In person"] : t.modes === "online" ? ["Online"] : ["In person"],
+    specialties: t.specialties ?? [],
+    blurb: t.long_bio ?? "A volunteer trainer in this community.",
+  }));
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-16">
       <header className="mb-10 text-center">
@@ -24,27 +63,35 @@ export default function Trainers() {
         </Link>
       </header>
 
-      {/* TODO: wire filters to query params + Supabase filtering by mode/specialty/location */}
       <div className="mb-8 flex flex-wrap justify-center gap-3">
-        {filters.map((f, i) => (
-          <button
+        {filters.map((f) => (
+          <Link
             key={f}
+            href={filterHref(f)}
             className={
-              i === 0
+              isActive(f, mode, specialty)
                 ? "rounded-full bg-gold px-5 py-2 text-sm font-semibold text-white"
                 : "rounded-full border border-line px-5 py-2 text-sm font-medium text-stone hover:bg-cream"
             }
           >
             {f}
-          </button>
+          </Link>
         ))}
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {trainers.map((t, i) => (
-          <TrainerCard key={i} trainer={t} />
+          <ScrollReveal key={i} style={{ transitionDelay: `${Math.min(i, 5) * 80}ms` }}>
+            <TrainerCard trainer={t} />
+          </ScrollReveal>
         ))}
       </div>
+      {trainers.length === 0 && (
+        <div className="flex flex-col items-center gap-3 py-10 text-center text-stone">
+          <Sparkles size={32} className="text-gold-soft" />
+          <p>No trainers match yet — check back soon, or volunteer your own time.</p>
+        </div>
+      )}
     </div>
   );
 }

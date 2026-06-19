@@ -1,9 +1,12 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import ScriptureCard from "@/components/ScriptureCard";
 import SectionDivider from "@/components/SectionDivider";
+import ScrollReveal from "@/components/ScrollReveal";
+import { createClient } from "@/lib/supabase/server";
 
-// TODO: replace with a Supabase query (table: scriptures, today's date).
-const dailyScripture = {
+// Fallback shown when no `scriptures` row is seeded for today's date.
+const fallbackScripture = {
   reference: "Isaiah 40:31",
   text:
     "But they who wait for the Lord shall renew their strength; they shall mount up with wings like eagles; they shall run and not be weary.",
@@ -25,7 +28,16 @@ const destinations = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const today = new Date().toISOString().slice(0, 10);
+  const { data: scripture } = await supabase
+    .from("scriptures")
+    .select("reference, text, translation")
+    .eq("feature_date", today)
+    .maybeSingle();
+  const dailyScripture = scripture ?? fallbackScripture;
+
   return (
     <>
       {/* Hero */}
@@ -65,7 +77,9 @@ export default function Home() {
 
       {/* Daily scripture — the signature */}
       <section className="px-6 py-14">
-        <ScriptureCard {...dailyScripture} />
+        <ScrollReveal>
+          <ScriptureCard {...dailyScripture} />
+        </ScrollReveal>
       </section>
 
       <SectionDivider />
@@ -73,23 +87,24 @@ export default function Home() {
       {/* Destinations */}
       <section className="mx-auto max-w-6xl px-6 pt-14 pb-24">
         <div className="grid gap-6 sm:grid-cols-2">
-          {destinations.map((d) => (
-            <Link
-              key={d.href}
-              href={d.href}
-              className="group flex flex-col rounded-2xl border border-line bg-paper p-8 transition-all hover:-translate-y-1 hover:border-gold-soft hover:shadow-lg"
-            >
-              <h2 className="font-display text-3xl font-semibold text-ink">
-                {d.title}
-              </h2>
-              <p className="mt-3 flex-1 leading-relaxed text-stone">{d.body}</p>
-              <span className="mt-6 inline-flex items-center gap-2 font-semibold text-gold-deep">
-                {d.cta}
-                <span aria-hidden className="transition-transform group-hover:translate-x-1">
-                  →
+          {destinations.map((d, i) => (
+            <ScrollReveal key={d.href} style={{ transitionDelay: `${i * 100}ms` }}>
+              <Link
+                href={d.href}
+                className="group flex flex-col rounded-2xl border border-line bg-paper p-8 transition-all hover:-translate-y-1 hover:border-gold-soft hover:shadow-lg"
+              >
+                <h2 className="font-display text-3xl font-semibold text-ink">
+                  {d.title}
+                </h2>
+                <p className="mt-3 flex-1 leading-relaxed text-stone">{d.body}</p>
+                <span className="mt-6 inline-flex items-center gap-2 font-semibold text-gold-deep">
+                  {d.cta}
+                  <span aria-hidden className="transition-transform group-hover:translate-x-1">
+                    <ArrowRight size={18} />
+                  </span>
                 </span>
-              </span>
-            </Link>
+              </Link>
+            </ScrollReveal>
           ))}
         </div>
       </section>
