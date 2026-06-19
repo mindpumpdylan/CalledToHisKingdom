@@ -4,6 +4,7 @@ import PrayerCard from "@/components/PrayerCard";
 import ScrollReveal from "@/components/ScrollReveal";
 import { createClient } from "@/lib/supabase/server";
 import { timeAgo } from "@/lib/format";
+import type { PrayerCategory } from "@/lib/types";
 
 type PrayerRow = {
   id: string;
@@ -11,19 +12,37 @@ type PrayerRow = {
   body: string;
   category: string;
   is_anonymous: boolean;
+  is_answered: boolean;
   created_at: string;
   profiles: { display_name: string } | null;
 };
 
-export default async function PrayerWall() {
+const categories: PrayerCategory[] = [
+  "Healing",
+  "Guidance",
+  "Gratitude",
+  "Family",
+  "Provision",
+  "Other",
+];
+
+export default async function PrayerWall({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const { category } = await searchParams;
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();
   const viewerId = userData.user?.id ?? null;
 
-  const { data: prayersData } = await supabase
+  let query = supabase
     .from("prayer_requests")
-    .select("id, title, body, category, is_anonymous, created_at, profiles(display_name)")
+    .select("id, title, body, category, is_anonymous, is_answered, created_at, profiles(display_name)")
     .order("created_at", { ascending: false });
+  if (category) query = query.eq("category", category);
+
+  const { data: prayersData } = await query;
   const prayers = prayersData as unknown as PrayerRow[] | null;
 
   const prayerIds = (prayers ?? []).map((p) => p.id);
@@ -55,6 +74,32 @@ export default async function PrayerWall() {
         </Link>
       </header>
 
+      <div className="mb-8 flex flex-wrap justify-center gap-3">
+        <Link
+          href="/prayer"
+          className={
+            !category
+              ? "rounded-full bg-gold px-5 py-2 text-sm font-semibold text-white"
+              : "rounded-full border border-line px-5 py-2 text-sm font-medium text-stone hover:bg-cream"
+          }
+        >
+          All
+        </Link>
+        {categories.map((c) => (
+          <Link
+            key={c}
+            href={`/prayer?category=${encodeURIComponent(c)}`}
+            className={
+              category === c
+                ? "rounded-full bg-gold px-5 py-2 text-sm font-semibold text-white"
+                : "rounded-full border border-line px-5 py-2 text-sm font-medium text-stone hover:bg-cream"
+            }
+          >
+            {c}
+          </Link>
+        ))}
+      </div>
+
       <div className="space-y-5">
         {(prayers ?? []).map((p, i) => (
           <ScrollReveal key={p.id} style={{ transitionDelay: `${Math.min(i, 5) * 80}ms` }}>
@@ -63,6 +108,7 @@ export default async function PrayerWall() {
                 id: p.id,
                 author: p.profiles?.display_name ?? "A member",
                 isAnonymous: p.is_anonymous,
+                isAnswered: p.is_answered,
                 category: p.category,
                 title: p.title,
                 body: p.body,
@@ -77,7 +123,11 @@ export default async function PrayerWall() {
         {(prayers ?? []).length === 0 && (
           <div className="flex flex-col items-center gap-3 py-10 text-center text-stone">
             <Inbox size={32} className="text-gold-soft" />
-            <p>No prayers yet — be the first to share what&apos;s on your heart.</p>
+            <p>
+              {category
+                ? `No prayers in “${category}” yet — be the first to share.`
+                : "No prayers yet — be the first to share what's on your heart."}
+            </p>
           </div>
         )}
       </div>

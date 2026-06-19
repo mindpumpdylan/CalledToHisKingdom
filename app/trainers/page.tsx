@@ -39,6 +39,7 @@ export default async function Trainers({
   const { data: trainerRows } = await query;
 
   const trainers = (trainerRows ?? []).map((t) => ({
+    id: t.profile_id as string,
     name: t.profiles?.display_name ?? "A trainer",
     location:
       t.modes === "online"

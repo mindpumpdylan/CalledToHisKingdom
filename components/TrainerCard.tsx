@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { Laptop, MapPin } from "lucide-react";
 
 type Trainer = {
+  id: string;
   name: string;
   location: string;
   modes: string[];      // e.g. ["Online", "In person"]
@@ -44,8 +46,9 @@ export default function TrainerCard({ trainer }: { trainer: Trainer }) {
 
       <div className="mt-5 flex items-center justify-between border-t border-line pt-4">
         <span className="text-sm text-stone">Accepting clients</span>
-        {/* TODO: requires auth — opens trainer_availability booking flow */}
-        <button className="btn-gold-sm">View availability</button>
+        <Link href={`/trainers/${trainer.id}`} className="btn-gold-sm">
+          View availability
+        </Link>
       </div>
     </article>
   );

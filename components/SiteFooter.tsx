@@ -1,14 +1,23 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function SiteFooter() {
   return (
     <footer className="border-t border-line bg-cream/40">
       <div className="mx-auto grid max-w-6xl gap-8 px-6 py-12 sm:grid-cols-3">
         <div>
-          <p className="font-display text-lg font-semibold text-ink">
-            Called To His Kingdom
-          </p>
-          <p className="mt-2 max-w-xs text-sm text-stone">
+          <div className="flex items-center gap-3">
+            <span
+              aria-hidden
+              className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-gold-soft"
+            >
+              <Image src="/Logo.png" alt="" fill sizes="40px" className="object-cover" />
+            </span>
+            <p className="font-display text-lg font-semibold text-ink">
+              Called To His Kingdom
+            </p>
+          </div>
+          <p className="mt-3 max-w-xs text-sm text-stone">
             A Christian workout community built on prayer, scripture, and the
             gift of time freely given.
           </p>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Cross } from "lucide-react";
+import Image from "next/image";
 import { getCurrentProfile } from "@/lib/supabase/auth-helpers";
 import { signOut } from "@/app/actions/auth";
 import MobileNav from "@/components/MobileNav";
@@ -19,9 +19,9 @@ export default async function SiteNav() {
         <Link href="/" className="flex items-center gap-3">
           <span
             aria-hidden
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-gold text-gold-deep"
+            className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full ring-1 ring-gold-soft"
           >
-            <Cross size={18} strokeWidth={2} />
+            <Image src="/Logo.png" alt="" fill sizes="40px" className="object-cover" />
           </span>
           <span className="font-display text-xl font-semibold leading-tight text-ink">
             Called To His Kingdom

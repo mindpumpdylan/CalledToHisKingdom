@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { HandHeart } from "lucide-react";
+import { HandHeart, CheckCircle2 } from "lucide-react";
 import PrayingButton from "@/components/PrayingButton";
 
 type Prayer = {
   id: string;
   author: string;
   isAnonymous?: boolean;
+  isAnswered?: boolean;
   category: string;
   title: string;
   body: string;
@@ -25,7 +26,14 @@ export default function PrayerCard({
   return (
     <article className="card hover:-translate-y-1 hover:border-gold-soft">
       <div className="mb-3 flex items-center justify-between">
-        <span className="badge-gold uppercase tracking-wide">{prayer.category}</span>
+        <div className="flex items-center gap-2">
+          <span className="badge-gold uppercase tracking-wide">{prayer.category}</span>
+          {prayer.isAnswered && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-cream px-3 py-1 text-xs font-semibold text-gold-deep">
+              <CheckCircle2 size={12} /> Answered
+            </span>
+          )}
+        </div>
         <span className="text-xs text-stone">{prayer.timeAgo}</span>
       </div>
       <h3 className="font-display text-2xl font-semibold text-ink">{prayer.title}</h3>
