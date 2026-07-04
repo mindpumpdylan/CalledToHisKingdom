@@ -15,6 +15,35 @@ function unescapeXmlEntities(value: string): string {
     .replace(/&apos;/g, "'");
 }
 
+function parseEntries(xml: string): LatestVideo[] {
+  const entries: LatestVideo[] = [];
+  for (const match of xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)) {
+    const entry = match[1];
+    const videoId = entry.match(/<yt:videoId>(.*?)<\/yt:videoId>/)?.[1];
+    const title = entry.match(/<title>(.*?)<\/title>/)?.[1];
+    if (videoId && title) {
+      entries.push({ videoId, title: unescapeXmlEntities(title) });
+    }
+  }
+  return entries;
+}
+
+// YouTube Shorts render at /shorts/{id} with a 200; regular videos 303-redirect
+// to /watch?v={id}. The RSS feed itself carries no duration/type field, so this
+// probe is how we tell the weekly episode apart from the channel's daily Shorts.
+async function isShort(videoId: string): Promise<boolean> {
+  try {
+    const res = await fetch(`https://www.youtube.com/shorts/${videoId}`, {
+      method: "HEAD",
+      redirect: "manual",
+      next: { revalidate: 3600 },
+    });
+    return res.status === 200;
+  } catch {
+    return true;
+  }
+}
+
 export async function getLatestVideo(): Promise<LatestVideo | null> {
   try {
     const res = await fetch(
@@ -23,15 +52,12 @@ export async function getLatestVideo(): Promise<LatestVideo | null> {
     );
     if (!res.ok) return null;
 
-    const xml = await res.text();
-    const entry = xml.match(/<entry>([\s\S]*?)<\/entry>/)?.[1];
-    if (!entry) return null;
+    const entries = parseEntries(await res.text());
+    if (entries.length === 0) return null;
 
-    const videoId = entry.match(/<yt:videoId>(.*?)<\/yt:videoId>/)?.[1];
-    const title = entry.match(/<title>(.*?)<\/title>/)?.[1];
-    if (!videoId || !title) return null;
-
-    return { videoId, title: unescapeXmlEntities(title) };
+    const shortFlags = await Promise.all(entries.map((entry) => isShort(entry.videoId)));
+    const latestEpisode = entries.find((_, i) => !shortFlags[i]);
+    return latestEpisode ?? null;
   } catch {
     return null;
   }
