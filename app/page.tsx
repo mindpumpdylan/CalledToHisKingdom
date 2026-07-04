@@ -14,7 +14,9 @@ import ScriptureCard from "@/components/ScriptureCard";
 import SectionDivider from "@/components/SectionDivider";
 import ScrollReveal from "@/components/ScrollReveal";
 import FaqAccordion from "@/components/FaqAccordion";
+import LatestVideo from "@/components/LatestVideo";
 import { createClient } from "@/lib/supabase/server";
+import { getLatestVideo } from "@/lib/youtube";
 
 // Fallback shown when no `scriptures` row is seeded for today's date.
 const fallbackScripture = {
@@ -112,11 +114,15 @@ const faqs = [
 export default async function Home() {
   const supabase = await createClient();
   const today = new Date().toISOString().slice(0, 10);
-  const { data: scripture } = await supabase
+  const scripturePromise = supabase
     .from("scriptures")
     .select("reference, text, translation")
     .eq("feature_date", today)
     .maybeSingle();
+  const [{ data: scripture }, latestVideo] = await Promise.all([
+    scripturePromise,
+    getLatestVideo(),
+  ]);
   const dailyScripture = scripture ?? fallbackScripture;
 
   return (
@@ -205,6 +211,19 @@ export default async function Home() {
       </section>
 
       <SectionDivider />
+
+      {/* Latest video */}
+      {latestVideo && (
+        <>
+          <section className="mx-auto max-w-6xl px-6 py-16">
+            <ScrollReveal>
+              <LatestVideo videoId={latestVideo.videoId} title={latestVideo.title} />
+            </ScrollReveal>
+          </section>
+
+          <SectionDivider />
+        </>
+      )}
 
       {/* How it works */}
       <section className="mx-auto max-w-6xl px-6 py-16">
