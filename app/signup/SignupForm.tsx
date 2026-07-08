@@ -32,6 +32,25 @@ export default function SignupForm({ redirectTo }: { redirectTo: string }) {
         minLength={6}
         className="input-field"
       />
+      <label className="flex items-start gap-2 text-sm text-stone">
+        <input
+          type="checkbox"
+          name="agreeToTerms"
+          required
+          className="mt-1 h-4 w-4 rounded border-line text-gold focus:ring-gold-soft"
+        />
+        <span>
+          I agree to the{" "}
+          <a href="/terms" target="_blank" className="font-semibold text-gold-deep">
+            Terms of Service
+          </a>{" "}
+          and{" "}
+          <a href="/privacy" target="_blank" className="font-semibold text-gold-deep">
+            Privacy Policy
+          </a>
+          .
+        </span>
+      </label>
       {state?.error && (
         <p className="text-sm font-medium text-red-600">{state.error}</p>
       )}

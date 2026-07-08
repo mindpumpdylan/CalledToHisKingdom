@@ -36,6 +36,8 @@ export default function SiteFooter() {
             <li><Link href="/login" className="hover:text-gold-deep">Sign in</Link></li>
             <li><Link href="/signup" className="hover:text-gold-deep">Create an account</Link></li>
             <li><Link href="/profile" className="hover:text-gold-deep">My profile</Link></li>
+            <li><Link href="/terms" className="hover:text-gold-deep">Terms of Service</Link></li>
+            <li><Link href="/privacy" className="hover:text-gold-deep">Privacy Policy</Link></li>
           </ul>
         </div>
       </div>
