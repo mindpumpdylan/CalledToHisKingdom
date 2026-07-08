@@ -4,9 +4,9 @@ import LoginForm from "./LoginForm";
 export default async function Login({
   searchParams,
 }: {
-  searchParams: Promise<{ redirectTo?: string }>;
+  searchParams: Promise<{ redirectTo?: string; error?: string }>;
 }) {
-  const { redirectTo = "/" } = await searchParams;
+  const { redirectTo = "/", error } = await searchParams;
 
   return (
     <div className="mx-auto flex max-w-md flex-col px-6 py-20 text-center">
@@ -18,6 +18,9 @@ export default async function Login({
       </div>
       <h1 className="mt-6 font-display text-4xl font-semibold text-ink">Welcome back</h1>
       <p className="mt-2 text-stone">Sign in to pray, post, and book sessions.</p>
+      {error && (
+        <p className="mt-4 text-sm font-medium text-red-600">{error}</p>
+      )}
       <LoginForm redirectTo={redirectTo} />
       <p className="mt-6 text-sm text-stone">
         New here? <a href="/signup" className="font-semibold text-gold-deep">Create an account</a>

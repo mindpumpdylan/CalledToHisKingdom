@@ -24,6 +24,11 @@ export default function LoginForm({ redirectTo }: { redirectTo: string }) {
         required
         className="input-field"
       />
+      <p className="text-right text-sm">
+        <a href="/forgot-password" className="font-semibold text-gold-deep">
+          Forgot password?
+        </a>
+      </p>
       {state?.error && (
         <p className="text-sm font-medium text-red-600">{state.error}</p>
       )}

@@ -41,7 +41,7 @@ body {
     @apply inline-flex items-center justify-center gap-2 rounded-full
            px-8 py-4 text-base font-semibold tracking-wide transition-all
            duration-200 focus-visible:outline-none focus-visible:ring-4
-           focus-visible:ring-gold-soft bg-gold text-white shadow-sm
+           focus-visible:ring-gold-soft bg-gold text-ink shadow-sm
            hover:bg-gold-deep hover:shadow-md active:translate-y-px;
   }
   .btn-outline {
@@ -55,7 +55,7 @@ body {
     @apply inline-flex items-center justify-center gap-2 rounded-full
            px-6 py-2.5 text-sm font-semibold tracking-wide transition-all
            duration-200 focus-visible:outline-none focus-visible:ring-4
-           focus-visible:ring-gold-soft bg-gold text-white shadow-sm
+           focus-visible:ring-gold-soft bg-gold text-ink shadow-sm
            hover:bg-gold-deep hover:shadow-md active:translate-y-px;
   }
   /* Thin gold frame used on the scripture "illuminated" card */
